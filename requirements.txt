@@ -1,0 +1,10 @@
+import easyocr
+from PIL import Image, ImageFilter
+import numpy as np
+import cv2
+import os
+import re
+import warnings
+from pdf2image import convert_from_path
+from fuzzywuzzy import fuzz
+import argparse
