@@ -86,7 +86,7 @@ def calculate_pii_positions(image, pii):
     return positions
 
 # Function to process and blur PII in a single image
-def process_image(image, selected_pii_types):
+def process_image(image, selected_pii_types=None):
     # Ensure the image is in RGB mode
     image = image.convert('RGB')
     
@@ -95,6 +95,9 @@ def process_image(image, selected_pii_types):
     pii = detect_pii(text)
     
     if pii:
+         if selected_pii_types is None:
+            selected_pii_types = list(pii.keys())
+        
         # Filter positions based on selected PII types
         selected_pii_positions = {ptype: pii[ptype] for ptype in selected_pii_types if ptype in pii}
         
@@ -162,23 +165,20 @@ def process_pdf(pdf_path):
 def main():
     parser = argparse.ArgumentParser(description='Detect and blur PII in images and PDFs.')
     parser.add_argument('input', type=str, help='Path to an image file or PDF.')
-
     args = parser.parse_args()
-
     if os.path.isfile(args.input):
         _, ext = os.path.splitext(args.input)
         ext = ext.lower()
-
         if ext in ['.pdf']:
             process_pdf(args.input)
         elif ext in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']:
             image = Image.open(args.input)
-            processed_image = process_image(image, selected_pii_types=None)  # Use None initially
+            processed_image = process_image(image)  # No need to set selected_pii_types explicitly
             if processed_image:
                 processed_dir = 'processed'
                 if not os.path.exists(processed_dir):
                     os.makedirs(processed_dir)
-                
+
                 output_path = os.path.join(processed_dir, os.path.basename(args.input).replace(".", "_processed."))
                 processed_image.save(output_path)
                 print(f"Saved processed image as: {output_path}")
